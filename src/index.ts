@@ -3,6 +3,7 @@ import { Server } from "http"
 import createHttpError from "http-errors"
 import { config } from "dotenv"
 import bodyParser from "body-parser"
+import cors from "cors";
 
 import { dbConnection } from "./helpers/database"
 import { createSerialNumber } from "./helpers/serialNumber"
@@ -11,14 +12,21 @@ config()
 
 const app: Application = express()
 
-app.use(function (req, res, next) {
-    res.header('Access-Control-Allow-Origin', '*') // update to match the domain you will make the request from
-    res.header(
-      'Access-Control-Allow-Headers',
-      'Origin, X-Requested-With, Content-Type, Accept',
-    )
-    next()
-  })
+const corsOptions = {
+	origin: '*',
+	optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
+
+// app.use(function (req, res, next) {
+//     res.header('Access-Control-Allow-Origin', '*') // update to match the domain you will make the request from
+//     res.header(
+//       'Access-Control-Allow-Headers',
+//       'Origin, X-Requested-With, Content-Type, Accept',
+//     )
+//     next()
+//   })
 
 app.use(bodyParser.urlencoded({ extended: false }))
 
