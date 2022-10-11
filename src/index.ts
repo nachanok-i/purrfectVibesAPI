@@ -13,8 +13,8 @@ config()
 const app: Application = express()
 
 const corsOptions = {
-	origin: '*',
-	optionsSuccessStatus: 200
+    origin: '*',
+    optionsSuccessStatus: 200
 };
 
 app.use(cors(corsOptions));
@@ -86,6 +86,28 @@ app.post('/warranty', (req: Request, res: Response) => {
         res.sendStatus(201)
     })
 
+})
+
+app.get('/warranty/:serialNumber', (req: Request, res: Response, next: NextFunction) => {
+    let serialNumber = req.params.serialNumber;
+    if (!serialNumber) {
+        return res
+            .status(400)
+            .send({ error: true, message: 'Please provide serial number' })
+    } else {
+        dbConnection.getConnection((err, connection) => {
+            if (err) throw err
+            console.log(`connected as id ${connection.threadId}`);
+            connection.query('SELECT warranty.serialNumber, warranty.orderId, user.firstName, user.lastName, user.email, user.phoneNumber FROM warranty INNER JOIN user ON warranty.userId = user.Id WHERE warranty.serialNumber = ?', [serialNumber], (err, rows) => {
+                connection.release()
+                if (!err) {
+                    res.send(rows)
+                } else {
+                    console.log(err)
+                }
+            })
+        })
+    }
 })
 
 // test
