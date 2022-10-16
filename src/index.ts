@@ -14,7 +14,8 @@ const app: Application = express()
 
 const corsOptions = {
     origin: '*',
-    optionsSuccessStatus: 200
+    optionsSuccessStatus: 200,
+    methods: ['GET', 'POST', 'DELETE', 'UPDATE', 'PUT', 'PATCH']
 };
 
 app.use(cors(corsOptions));
@@ -33,7 +34,8 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
 app.get('/', (req: Request, res: Response, next: NextFunction) => {
-    res.send("Hello from index")
+    // res.send("Hello from index")
+    fetch("https://3fab-49-228-75-35.ap.ngrok.io/warranty").then(req => req.text()).then(console.log)
 })
 
 app.get('/test', (req: Request, res: Response, next: NextFunction) => {
@@ -85,7 +87,6 @@ app.post('/warranty', (req: Request, res: Response) => {
         connection.release()
         res.sendStatus(201)
     })
-
 })
 
 app.get('/warranty/:serialNumber', (req: Request, res: Response, next: NextFunction) => {
