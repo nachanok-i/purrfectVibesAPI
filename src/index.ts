@@ -35,8 +35,8 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
 app.get('/', (req: Request, res: Response, next: NextFunction) => {
-    // res.send("Hello from index")
-    fetch("https://3fab-49-228-75-35.ap.ngrok.io/warranty").then(req => req.text()).then(console.log)
+    res.send("Hello from index")
+    // fetch("https://3fab-49-228-75-35.ap.ngrok.io/warranty").then(req => req.text()).then(console.log)
 })
 
 app.get('/test', (req: Request, res: Response, next: NextFunction) => {
@@ -54,7 +54,7 @@ app.get('/test', (req: Request, res: Response, next: NextFunction) => {
     })
 })
 
-app.post('/warranty', (req: Request, res: Response) => {
+app.post('/warranty/register', (req: Request, res: Response) => {
     dbConnection.getConnection((err, connection) => {
         if (err) {
             console.log(err);
@@ -96,18 +96,38 @@ app.get('/warranty/:serialNumber', (req: Request, res: Response, next: NextFunct
         return res
             .status(400)
             .send({ error: true, message: 'Please provide serial number' })
-    } else {
+    } 
+    else {
         dbConnection.getConnection((err, connection) => {
             if (err) throw err
             console.log(`connected as id ${connection.threadId}`);
-            connection.query('SELECT warranty.serialNumber, warranty.orderId, user.firstName, user.lastName, user.email, user.phoneNumber FROM warranty INNER JOIN user ON warranty.userId = user.Id WHERE warranty.serialNumber = ?', [serialNumber], (err, rows) => {
-                connection.release()
+            // check exist serial number
+            connection.query('SELECT IFNULL(id, 0) FROM `serialNumber` WHERE `serialNumber` = ?', [serialNumber], (err, rows) => {
                 if (!err) {
-                    res.send(rows)
+                    if (rows[0] != null) {
+                        // check is registered
+                        connection.query('SELECT IFNULL(id, 0) FROM `serialNumber` WHERE `serialNumber` = ?', [serialNumber], (err, rows) => {
+
+                        })
+                    }
+                    else {
+                        return res
+                        .status(400)
+                        .send({ error: true, message: 'Serial number does not exist' })
+                    }
                 } else {
-                    console.log(err)
+                    console.log(err);
                 }
             })
+
+            // connection.query('SELECT warranty.serialNumber, warranty.orderId, user.firstName, user.lastName, user.email, user.phoneNumber FROM warranty INNER JOIN user ON warranty.userId = user.Id WHERE warranty.serialNumber = ?', [serialNumber], (err, rows) => {
+            //     connection.release()
+            //     if (!err) {
+            //         res.send(rows)
+            //     } else {
+            //         console.log(err)
+            //     }
+            // })
         })
     }
 })
@@ -115,6 +135,9 @@ app.get('/warranty/:serialNumber', (req: Request, res: Response, next: NextFunct
 // test
 // console.log("testing");
 // createSerialNumber("AMY","A","A");
+app.post('/warranty/admin/createSerialNumber', (req: Request, res: Response) => {
+    createSerialNumber("AMY","A","A");
+})
 
 
 app.use((req: Request, res: Response, next: NextFunction) => {
@@ -133,5 +156,5 @@ app.use(errorHandler)
 
 const PORT: Number = Number(process.env.PORT) || 3000
 const server: Server = app.listen(PORT, () => {
-    console.log(`Server 2 is running on port ${PORT}`)
+    console.log(`Server is running on port ${PORT}`)
 })

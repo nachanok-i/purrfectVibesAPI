@@ -1,5 +1,4 @@
 import { readCsvFrom } from "./utils";
-
 import { dbConnection } from "./database"
 
 const path = './src/data/rNumber.csv';
