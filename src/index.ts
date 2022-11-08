@@ -149,7 +149,7 @@ app.get('/warranty/:serialNumber', (req: Request, res: Response, next: NextFunct
                         connection.query('SELECT startDate FROM serialNumber WHERE serialNumber = ?', [serialNumber], (err, rows) => {
                             if (!err) {
                                 connection.release()
-                                if (rows[0]) {
+                                if (rows[0].startDate != null) {
                                     const sDate = rows[0].startDate.toJSON().slice(0, 10);
                                     let startDate = new Date(sDate);
                                     let currentDate = new Date();
