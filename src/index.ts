@@ -136,8 +136,7 @@ app.get('/warranty/:serialNumber', (req: Request, res: Response, next: NextFunct
         dbConnection.getConnection((err, connection) => {
             if (err) throw err
             console.log(`connected as id ${connection.threadId}`);
-            // check exist serial number
-            connection.query('SELECT isRegistered FROM `serialNumber` WHERE `serialNumber` = ?', [serialNumber], (err, rows) => {
+            connection.query('SELECT isRegistered, startDate FROM serialNumber WHERE serialNumber = ?', [serialNumber], (err, rows) => {
                 if (rows.length != 0) {
                     // slice SN
                     // const _serie = serialNumber.slice(0, 3);
@@ -145,40 +144,33 @@ app.get('/warranty/:serialNumber', (req: Request, res: Response, next: NextFunct
                     // const _materialCode = serialNumber.slice(4, 5);
                     // console.log(_serie, _stoneCode, _materialCode);
                     // return startDate and duration
-                    connection.query('SELECT startDate FROM serialNumber WHERE serialNumber = ?', [serialNumber], (err, rows) => {
-                        if (!err) {
-                            connection.release()
-                            if (rows[0].startDate != null) {
-                                const sDate = rows[0].startDate.toJSON().slice(0, 10);
-                                let startDate = new Date(sDate);
-                                let currentDate = new Date();
-                                let Difference_In_Time = currentDate.getTime() - startDate.getTime()
-                                let Difference_In_Days = Difference_In_Time / (1000 * 3600 * 24);
-                                let duration = 365 - Math.floor(Difference_In_Days);
-                                if (duration < 0) {
-                                    duration = 0;
-                                }
-                                else if (rows[0].isRegistered) {
-                                    duration = -1;
-                                }
-                                let result: { duration: number, startDate: Date } = {
-                                    duration: duration,
-                                    startDate: startDate
-                                }
-                                res.status(201)
-                                res.send(result)
-                            }
-                            else {
-                                res
-                                    .status(201)
-                                    .send('Invalid serial number');
-                            }
-                        } else {
-                            console.log(err)
-                            res.sendStatus(500);
-                            return;
+                    connection.release()
+                    if (rows[0].startDate != null) {
+                        const sDate = rows[0].startDate.toJSON().slice(0, 10);
+                        let startDate = new Date(sDate);
+                        let currentDate = new Date();
+                        let Difference_In_Time = currentDate.getTime() - startDate.getTime()
+                        let Difference_In_Days = Difference_In_Time / (1000 * 3600 * 24);
+                        let duration = 365 - Math.floor(Difference_In_Days);
+                        console.log(rows[0].isRegistered)
+                        if (duration < 0) {
+                            duration = 0;
                         }
-                    })
+                        else if (!rows[0].isRegistered) {
+                            duration = -1;
+                        }
+                        let result: { duration: number, startDate: Date } = {
+                            duration: duration,
+                            startDate: startDate
+                        }
+                        res.status(201)
+                        res.send(result)
+                    }
+                    else {
+                        res
+                            .status(201)
+                            .send('Invalid serial number');
+                    }
 
                     // return warranty detail
                     // connection.query('SELECT warranty.serialNumber, warranty.orderId, user.firstName, user.lastName, user.email, user.phoneNumber FROM warranty INNER JOIN user ON warranty.userId = user.Id WHERE warranty.serialNumber = ?', [serialNumber], (err, rows) => {
