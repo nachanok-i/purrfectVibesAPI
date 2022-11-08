@@ -118,8 +118,8 @@ app.post('/warranty/register', (req: Request, res: Response) => {
             }
             else {
                 return res
-                    .status(400)
-                    .send({ error: true, message: 'Invalid serial number' });
+                    .status(201)
+                    .send('Invalid serial number');
             }
         })
     })
@@ -149,21 +149,29 @@ app.get('/warranty/:serialNumber', (req: Request, res: Response, next: NextFunct
                         connection.query('SELECT startDate FROM serialNumber WHERE serialNumber = ?', [serialNumber], (err, rows) => {
                             if (!err) {
                                 connection.release()
-                                const sDate = rows[0].startDate.toJSON().slice(0, 10);
-                                let startDate = new Date(sDate);
-                                let currentDate = new Date();
-                                let Difference_In_Time = currentDate.getTime() - startDate.getTime()
-                                let Difference_In_Days = Difference_In_Time / (1000 * 3600 * 24);
-                                let duration = 365 - Math.floor(Difference_In_Days);
-                                if (duration < 0) {
-                                    duration = 0;
+                                if (rows[0]) {
+                                    const sDate = rows[0].startDate.toJSON().slice(0, 10);
+                                    let startDate = new Date(sDate);
+                                    let currentDate = new Date();
+                                    let Difference_In_Time = currentDate.getTime() - startDate.getTime()
+                                    let Difference_In_Days = Difference_In_Time / (1000 * 3600 * 24);
+                                    let duration = 365 - Math.floor(Difference_In_Days);
+                                    if (duration < 0) {
+                                        duration = 0;
+                                    }
+                                    let result: { duration: number, startDate: Date } = {
+                                        duration: duration,
+                                        startDate: startDate
+                                    }
+                                    res.status(201)
+                                    res.send(result)
                                 }
-                                let result: {duration: number, startDate: Date} = {
-                                    duration: duration, 
-                                    startDate: startDate 
+                                else {
+                                    res
+                                        .status(201)
+                                        .send('Invalid serial number');
                                 }
-                                res.status(201)
-                                res.send(result)
+
                             } else {
                                 console.log(err)
                                 res.sendStatus(500);
@@ -197,8 +205,8 @@ app.get('/warranty/:serialNumber', (req: Request, res: Response, next: NextFunct
                 }
                 else {
                     return res
-                        .status(400)
-                        .send({ error: true, message: 'Invalid serial number' });
+                        .status(201)
+                        .send('Invalid serial number');
                 }
             })
         })
