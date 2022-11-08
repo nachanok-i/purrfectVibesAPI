@@ -139,64 +139,59 @@ app.get('/warranty/:serialNumber', (req: Request, res: Response, next: NextFunct
             // check exist serial number
             connection.query('SELECT isRegistered FROM `serialNumber` WHERE `serialNumber` = ?', [serialNumber], (err, rows) => {
                 if (rows.length != 0) {
-                    if (rows[0].isRegistered) {
-                        // slice SN
-                        // const _serie = serialNumber.slice(0, 3);
-                        // const _stoneCode = serialNumber.slice(3, 4);
-                        // const _materialCode = serialNumber.slice(4, 5);
-                        // console.log(_serie, _stoneCode, _materialCode);
-                        // return startDate and duration
-                        connection.query('SELECT startDate FROM serialNumber WHERE serialNumber = ?', [serialNumber], (err, rows) => {
-                            if (!err) {
-                                connection.release()
-                                if (rows[0].startDate != null) {
-                                    const sDate = rows[0].startDate.toJSON().slice(0, 10);
-                                    let startDate = new Date(sDate);
-                                    let currentDate = new Date();
-                                    let Difference_In_Time = currentDate.getTime() - startDate.getTime()
-                                    let Difference_In_Days = Difference_In_Time / (1000 * 3600 * 24);
-                                    let duration = 365 - Math.floor(Difference_In_Days);
-                                    if (duration < 0) {
-                                        duration = 0;
-                                    }
-                                    let result: { duration: number, startDate: Date } = {
-                                        duration: duration,
-                                        startDate: startDate
-                                    }
-                                    res.status(201)
-                                    res.send(result)
+                    // slice SN
+                    // const _serie = serialNumber.slice(0, 3);
+                    // const _stoneCode = serialNumber.slice(3, 4);
+                    // const _materialCode = serialNumber.slice(4, 5);
+                    // console.log(_serie, _stoneCode, _materialCode);
+                    // return startDate and duration
+                    connection.query('SELECT startDate FROM serialNumber WHERE serialNumber = ?', [serialNumber], (err, rows) => {
+                        if (!err) {
+                            connection.release()
+                            if (rows[0].startDate != null) {
+                                const sDate = rows[0].startDate.toJSON().slice(0, 10);
+                                let startDate = new Date(sDate);
+                                let currentDate = new Date();
+                                let Difference_In_Time = currentDate.getTime() - startDate.getTime()
+                                let Difference_In_Days = Difference_In_Time / (1000 * 3600 * 24);
+                                let duration = 365 - Math.floor(Difference_In_Days);
+                                if (duration < 0) {
+                                    duration = 0;
                                 }
-                                else {
-                                    res
-                                        .status(201)
-                                        .send('Invalid serial number');
+                                else if (rows[0].isRegistered) {
+                                    duration = -1;
                                 }
-
-                            } else {
-                                console.log(err)
-                                res.sendStatus(500);
-                                return;
+                                let result: { duration: number, startDate: Date } = {
+                                    duration: duration,
+                                    startDate: startDate
+                                }
+                                res.status(201)
+                                res.send(result)
                             }
-                        })
+                            else {
+                                res
+                                    .status(201)
+                                    .send('Invalid serial number');
+                            }
+                        } else {
+                            console.log(err)
+                            res.sendStatus(500);
+                            return;
+                        }
+                    })
 
-                        // return warranty detail
-                        // connection.query('SELECT warranty.serialNumber, warranty.orderId, user.firstName, user.lastName, user.email, user.phoneNumber FROM warranty INNER JOIN user ON warranty.userId = user.Id WHERE warranty.serialNumber = ?', [serialNumber], (err, rows) => {
-                        //     if (!err) {
-                        //         connection.release()
-                        //         res.status(201)
-                        //         res.send(rows)
-                        //     } else {
-                        //         console.log(err)
-                        //         res.sendStatus(500);
-                        //         return;
-                        //     }
-                        // })
-                    }
-                    else {
-                        return res
-                            .status(201)
-                            .send([]);
-                    }
+                    // return warranty detail
+                    // connection.query('SELECT warranty.serialNumber, warranty.orderId, user.firstName, user.lastName, user.email, user.phoneNumber FROM warranty INNER JOIN user ON warranty.userId = user.Id WHERE warranty.serialNumber = ?', [serialNumber], (err, rows) => {
+                    //     if (!err) {
+                    //         connection.release()
+                    //         res.status(201)
+                    //         res.send(rows)
+                    //     } else {
+                    //         console.log(err)
+                    //         res.sendStatus(500);
+                    //         return;
+                    //     }
+                    // })
                 }
                 else if (err) {
                     console.log(err);
