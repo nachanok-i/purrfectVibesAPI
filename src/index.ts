@@ -13,7 +13,7 @@ config()
 const app: Application = express()
 
 const corsOptions = {
-    origin: '*',
+    origin: 'https://purrfect-vibes.com',
     optionsSuccessStatus: 200,
     methods: ['GET', 'POST', 'DELETE', 'UPDATE', 'PUT', 'PATCH'],
     credentials: true,
@@ -21,14 +21,14 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-app.use(function (req, res, next) {
-    res.header('Access-Control-Allow-Origin', '*') // update to match the domain you will make the request from
-    res.header(
-        'Access-Control-Allow-Headers',
-        'Origin, X-Requested-With, Content-Type, Accept',
-    )
-    next()
-})
+// app.use(function (req, res, next) {
+//     res.header('Access-Control-Allow-Origin', '*') // update to match the domain you will make the request from
+//     res.header(
+//         'Access-Control-Allow-Headers',
+//         'Origin, X-Requested-With, Content-Type, Accept',
+//     )
+//     next()
+// })
 
 app.use(bodyParser.urlencoded({ extended: false }))
 
@@ -36,22 +36,10 @@ app.use(bodyParser.json())
 
 app.get('/', (req: Request, res: Response, next: NextFunction) => {
     res.send("Hello from index")
-    // fetch("https://3fab-49-228-75-35.ap.ngrok.io/warranty").then(req => req.text()).then(console.log)
 })
 
 app.get('/test', (req: Request, res: Response, next: NextFunction) => {
-    dbConnection.getConnection((err, connection) => {
-        if (err) throw err
-        console.log(`connected as id ${connection.threadId}`);
-        connection.query('SELECT * from user', (err, rows) => {
-            connection.release()
-            if (!err) {
-                res.send(rows)
-            } else {
-                console.log(err)
-            }
-        })
-    })
+    res.send("Test connection success");
 })
 
 app.post('/warranty/register', (req: Request, res: Response) => {
@@ -152,7 +140,6 @@ app.get('/warranty/:serialNumber', (req: Request, res: Response, next: NextFunct
                         let Difference_In_Time = currentDate.getTime() - startDate.getTime()
                         let Difference_In_Days = Difference_In_Time / (1000 * 3600 * 24);
                         let duration = 365 - Math.floor(Difference_In_Days);
-                        console.log(rows[0].isRegistered)
                         if (duration < 0) {
                             duration = 0;
                         }
