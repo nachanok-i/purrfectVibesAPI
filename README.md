@@ -1,11 +1,11 @@
 ### env file
-
+```
 PORT=
 DB_HOST=''
 DB_USER=''
 DB_PASS=''
 DB_DATABASE=''
-
+```
 ### .htaccess file
 ```
 # DO NOT REMOVE. CLOUDLINUX PASSENGER CONFIGURATION BEGIN
